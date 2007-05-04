@@ -211,7 +211,7 @@ License: This program is free software; you can redistribute it and/or modify it
 		echo "\n\t<tr$style>";
 		foreach ($row as $key => $val) {
 			if ($key == "blocked")
-				$val = ($val ? "<strong>YES</strong" : "No");
+				$val = ($val ? "<strong>YES</strong>" : "No");
 			echo "\n\t\t<td><small>$val</small></td>";
 		}
 		echo "\n\t</tr>";
