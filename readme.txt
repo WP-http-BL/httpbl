@@ -17,6 +17,7 @@ http:BL WordPress Plugin allows you to verify IP addresses of clients connecting
 1. Uncompress it to your wp-content/plugins directory.
 1. Activate the plugin in the administration panel.
 1. Open the plugin’s configuration subpage and enter your Access Key and configure available options accordingly to your preferences.
+1. If you'd like http:BL WordPress Plugin to log any suspicious visitors create a proper table in your database. Its structure is available in file *httpbl_log.sql*.
 1. Save settings and enjoy.
 
 == Frequently Asked Questions ==
