@@ -9,7 +9,7 @@ Author URI: http://stepien.com.pl
 License: This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
 */
 	
-	add_action("init", "httpbl_check_referer");
+	add_action("init", "httpbl_check_visitor");
 	add_action("admin_menu", "httpbl_config_page");
 	
 	function httpbl_debug($message)
@@ -19,6 +19,7 @@ License: This program is free software; you can redistribute it and/or modify it
 		// Most probably in the header.
 	}
 
+	// Add a line to the log table
 	function httpbl_add_log($ip, $user_agent, $response, $blocked)
 	{
 	$time = gmdate("Y-m-d H:i:s",
@@ -31,6 +32,7 @@ License: This program is free software; you can redistribute it and/or modify it
 	$results = $wpdb->query($query);
 	}
 
+	// Get latest 50 entries from the log table
 	function httpbl_get_log()
 	{
 	$query = "SELECT * FROM ".$GLOBALS['table_prefix'].
@@ -38,8 +40,9 @@ License: This program is free software; you can redistribute it and/or modify it
 	$wpdb =& $GLOBALS['wpdb'];
 	return $wpdb->get_results($query);
 	}
-
-	function httpbl_check_referer()
+	
+	// The visitor verification function
+	function httpbl_check_visitor()
 	{
 		$key = get_option( "httpbl_key" );
 
@@ -64,9 +67,11 @@ License: This program is free software; you can redistribute it and/or modify it
 			
 			$hp = get_option('httpbl_hp');
 			
+			// Assume that visitor's OK
 			$age = false;
 			$threat = false;
 			$deny = false;
+			$blocked = false;
 			
 			if ( $result[1] < $age_thres )
 				$age = true;
@@ -77,14 +82,24 @@ License: This program is free software; you can redistribute it and/or modify it
 					and $value)
 					$deny = true;
 			}
+			
+			// If he's not OK
 			if ( $deny && $age && $threat ) {
 				$blocked = true;
+
+				// If we've got a Honey Pot link
 				if ( $hp ) {
 					header( "HTTP/1.1 301 Moved Permanently ");
 					header( "Location: $hp" );
 				}
+
 			}
+
+			// Are we logging?
 			if (get_option("httpbl_log") == true) {
+
+				// Checking if he's not one of those, who
+				// are not logged
 				$ips = explode(" ",
 					get_option("httpbl_not_logged_ips"));
 				$log = true;
@@ -92,6 +107,8 @@ License: This program is free software; you can redistribute it and/or modify it
 					if ($ip == $_SERVER["REMOTE_ADDR"])
 						$log = false;
 				}
+
+				// If he can be logged, we log him
 				if ($log)
 					httpbl_add_log($_SERVER["REMOTE_ADDR"],
 					$_SERVER["HTTP_USER_AGENT"],
@@ -166,11 +183,11 @@ License: This program is free software; you can redistribute it and/or modify it
 	<h3>Configuration</h3>
 	<form action='' method='post' id='httpbl'>
 		<p>http:BL Access Key <input type='text' name='key' value='<?php echo $key ?>' /> </p>
-		<p><small>Access Key is required to perform a http:BL query. You can get your key at <a href="http://www.projecthoneypot.org/httpbl_configure.php">http:BL Access Management page</a>. You need to register a free account at the Project Honey Pot website to get one.</small></p>
+		<p><small>An Access Key is required to perform a http:BL query. You can get your key at <a href="http://www.projecthoneypot.org/httpbl_configure.php">http:BL Access Management page</a>. You need to register a free account at the Project Honey Pot website to get one.</small></p>
 		<p>Age threshold <input type='text' name='age_thres' value='<?php echo $age_thres ?>'/></p>
-		<p><small>http:BL service provides you information about the date of the last activity of a checked IP. Due to the fact that the information in the Project Honey Pot database may be obsolete, you may set a age threshold, counted in days. If the verified IP hasn't been active for a period of time longer than the threshold it will be regarded as harmless.</small></p>
+		<p><small>http:BL service provides you information about the date of the last activity of a checked IP. Due to the fact that the information in the Project Honey Pot database may be obsolete, you may set an age threshold, counted in days. If the verified IP hasn't been active for a period of time longer than the threshold it will be regarded as harmless.</small></p>
 		<p>Threat score threshold <input type='text' name='threat_thres' value='<?php echo $threat_thres ?>'/></p>
-		<p><small>Each suspicious IP address is given a threat score. This scored is asigned by Project Honey Pot basing on various factors, such as the IP's activity or the damage done during the visits. The score is a number between 0 to 255, where 0 is no threat at all and 255 is extremely harmful. In the following field you may decide the threat score threshold. IP address with a score greater than the given number will be regarded as harmful.</small></p>
+		<p><small>Each suspicious IP address is given a threat score. This scored is asigned by Project Honey Pot basing on various factors, such as the IP's activity or the damage done during the visits. The score is a number between 0 and 255, where 0 is no threat at all and 255 is extremely harmful. In the field above you may set the threat score threshold. IP address with a score greater than the given number will be regarded as harmful.</small></p>
 		<fieldset>
 		<label>Types of visitors to be treated as malicious</label>
 		<p><input type='checkbox' name='deny_1' value='1' <?php echo $deny_checkbox[1] ?>/> Suspicious</p>
