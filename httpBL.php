@@ -108,6 +108,9 @@ License: This program is free software; you can redistribute it and/or modify it
 						$log = false;
 				}
 
+				// Don't log search engine bots
+				if ($result[3] == 0) $log = false;
+
 				// If he can be logged, we log him
 				if ($log)
 					httpbl_add_log($_SERVER["REMOTE_ADDR"],
