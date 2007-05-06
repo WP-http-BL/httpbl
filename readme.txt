@@ -24,8 +24,12 @@ http:BL WordPress Plugin allows you to verify IP addresses of clients connecting
 
 = Does http:BL WordPress Plugin work with WordPress MU? =
 
-Yes, it does, but it needs a small modification in the source code. Find a line containing *plugins.php* and change it to *wpmu-admin.php*. It should work fine.
+Yes, it does. If you don't want to give your bloggers an access to the plugin's configuration page, you have to modify the source code slightly. Find a line containing *plugins.php* and change it to *wpmu-admin.php*. It should work fine.
+
+= How do I create a table for the log? =
+
+In the archive you should find a file *httpbl_log.sql*. It contains the necessary MySQL command. All you’ve got to do is to execute this script, e.g. in your phpMyAdmin panel.
 
 = Is there an easy way to contact with the developer of this plugin? =
 
-Of course there is. Visit [the original blog post where the plugin has been announced](http://stepien.com.pl/2007/04/28/httpbl_wordpress_plugin/) and post your comment over there.
+Of course there is. Visit [the original blog post where the plugin has been announced](http://stepien.com.pl/2007/04/28/httpbl_wordpress_plugin/) and post your comment over there. If you don't feel like commenting, take a look at my [contact information page](http://stepien.com.pl/contact).
