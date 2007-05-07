@@ -26,6 +26,7 @@ License: This program is free software; you can redistribute it and/or modify it
 		time() + get_option('gmt_offset') * 60 * 60 );
 	$blocked = ($blocked ? 1 : 0);
 	$wpdb =& $GLOBALS['wpdb'];
+	$user_agent = htmlentities($user_agent, ENT_QUOTES);
 	$query = "INSERT INTO ".$GLOBALS['table_prefix']."httpbl_log ".
 		"(ip, time, user_agent, httpbl_response, blocked) VALUES ( ".
 		"'$ip', '$time', '$user_agent', '$response', $blocked);";
