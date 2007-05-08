@@ -32,7 +32,7 @@ License: This program is free software; you can redistribute it and/or modify it
 			" VALUES ( '$ip', '$time', '$user_agent',".
 			"'$response', $blocked);";
 		$results = $wpdb->query($query);
-		}
+	}
 
 	// Get latest 50 entries from the log table
 	function httpbl_get_log()
@@ -46,9 +46,8 @@ License: This program is free software; you can redistribute it and/or modify it
 	// Check whether the table exists
 	function httpbl_check_log_table()
 	{
-		$query = "SHOW TABLES;";
 		$wpdb =& $GLOBALS['wpdb'];
-		$result = $wpdb->get_results($query);
+		$result = $wpdb->get_results("SHOW TABLES");
 		foreach ($result as $stdobject) {
 			foreach ($stdobject as $table) {
 				if ($GLOBALS['table_prefix'].
@@ -82,6 +81,7 @@ License: This program is free software; you can redistribute it and/or modify it
 	{
 		$file = substr(__FILE__, 0, strrpos(__FILE__, "/")).
 			"/httpbl_log.sql";
+		// Chech if there's the file with the log table structure
 		if (is_file($file)) {
 			$sql = file($file);
 			$sql = implode(" ", $sql);
@@ -211,7 +211,7 @@ License: This program is free software; you can redistribute it and/or modify it
 		if (isset($_POST["httpbl_drop"]))
 			httpbl_drop_log_table();
 		
-		// Should we delete the log table?
+		// Should we create a new log table?
 		if (isset($_POST["httpbl_create"]))
 			httpbl_create_log_table();
 		
@@ -250,6 +250,7 @@ License: This program is free software; you can redistribute it and/or modify it
 	<h2>http:BL WordPress Plugin</h2>
 	<p><a href="#conf">Configuration</a>
 <?php
+	// No need to link to the log section, if we're not logging
 	if (get_option("httpbl_log")) {
 ?>
 | <a href="#log">Log</a></p>
