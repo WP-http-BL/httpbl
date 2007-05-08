@@ -26,6 +26,8 @@ http:BL WordPress Plugin allows you to verify IP addresses of clients connecting
 
 Yes, it does. If you don't want to give your bloggers an access to the plugin's configuration page, you have to modify the source code slightly. Find a line containing `plugins.php` and change it to `wpmu-admin.php`. It should work fine.
 
+For even better compatibility with WPMU take a look at [zice.ro blog](http://zice.ro/blog/2007/05/07/modified-honeypot-plugin/).
+
 = How do I create a table for the log? =
 
 In the archive you should find a file `httpbl_log.sql`. It contains the necessary MySQL command. All you’ve got to do is to execute this script, e.g. in your phpMyAdmin panel.
