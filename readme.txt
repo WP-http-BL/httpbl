@@ -14,21 +14,21 @@ http:BL WordPress Plugin allows you to verify IP addresses of clients connecting
 == Installation ==
 
 1. Get an archive with the most recent version of http:BL WordPress Plugin.
-1. Uncompress it to your wp-content/plugins directory.
+1. Uncompress it to your `wp-content/plugins` directory.
 1. Activate the plugin in the administration panel.
 1. Open the plugin’s configuration subpage and enter your Access Key and configure available options accordingly to your preferences.
-1. If you'd like http:BL WordPress Plugin to log any suspicious visitors create a proper table in your database. Its structure is available in file *httpbl_log.sql*.
+1. If you'd like http:BL WordPress Plugin to log any suspicious visitors create a proper table in your database. Its structure is available in file `httpbl_log.sql`.
 1. Save settings and enjoy.
 
 == Frequently Asked Questions ==
 
 = Does http:BL WordPress Plugin work with WordPress MU? =
 
-Yes, it does. If you don't want to give your bloggers an access to the plugin's configuration page, you have to modify the source code slightly. Find a line containing *plugins.php* and change it to *wpmu-admin.php*. It should work fine.
+Yes, it does. If you don't want to give your bloggers an access to the plugin's configuration page, you have to modify the source code slightly. Find a line containing `plugins.php` and change it to `wpmu-admin.php`. It should work fine.
 
 = How do I create a table for the log? =
 
-In the archive you should find a file *httpbl_log.sql*. It contains the necessary MySQL command. All you’ve got to do is to execute this script, e.g. in your phpMyAdmin panel.
+In the archive you should find a file `httpbl_log.sql`. It contains the necessary MySQL command. All you’ve got to do is to execute this script, e.g. in your phpMyAdmin panel.
 
 = Is there an easy way to contact with the developer of this plugin? =
 

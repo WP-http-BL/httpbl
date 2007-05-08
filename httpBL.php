@@ -22,24 +22,76 @@ License: This program is free software; you can redistribute it and/or modify it
 	// Add a line to the log table
 	function httpbl_add_log($ip, $user_agent, $response, $blocked)
 	{
-	$time = gmdate("Y-m-d H:i:s",
-		time() + get_option('gmt_offset') * 60 * 60 );
-	$blocked = ($blocked ? 1 : 0);
-	$wpdb =& $GLOBALS['wpdb'];
-	$user_agent = htmlentities($user_agent, ENT_QUOTES);
-	$query = "INSERT INTO ".$GLOBALS['table_prefix']."httpbl_log ".
-		"(ip, time, user_agent, httpbl_response, blocked) VALUES ( ".
-		"'$ip', '$time', '$user_agent', '$response', $blocked);";
-	$results = $wpdb->query($query);
-	}
+		$time = gmdate("Y-m-d H:i:s",
+			time() + get_option('gmt_offset') * 60 * 60 );
+		$blocked = ($blocked ? 1 : 0);
+		$wpdb =& $GLOBALS['wpdb'];
+		$user_agent = htmlentities($user_agent, ENT_QUOTES);
+		$query = "INSERT INTO ".$GLOBALS['table_prefix']."httpbl_log ".
+			"(ip, time, user_agent, httpbl_response, blocked)".
+			" VALUES ( '$ip', '$time', '$user_agent',".
+			"'$response', $blocked);";
+		$results = $wpdb->query($query);
+		}
 
 	// Get latest 50 entries from the log table
 	function httpbl_get_log()
 	{
-	$query = "SELECT * FROM ".$GLOBALS['table_prefix'].
-		"httpbl_log ORDER BY id DESC LIMIT 50";
-	$wpdb =& $GLOBALS['wpdb'];
-	return $wpdb->get_results($query);
+		$query = "SELECT * FROM ".$GLOBALS['table_prefix'].
+			"httpbl_log ORDER BY id DESC LIMIT 50";
+		$wpdb =& $GLOBALS['wpdb'];
+		return $wpdb->get_results($query);
+	}
+	
+	// Check whether the table exists
+	function httpbl_check_log_table()
+	{
+		$query = "SHOW TABLES;";
+		$wpdb =& $GLOBALS['wpdb'];
+		$result = $wpdb->get_results($query);
+		foreach ($result as $stdobject) {
+			foreach ($stdobject as $table) {
+				if ($GLOBALS['table_prefix'].
+					"httpbl_log" == $table) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	// Truncate the log table
+	function httpbl_truncate_log_table()
+	{
+		$wpdb =& $GLOBALS['wpdb'];
+		return $wpdb->get_results("TRUNCATE ".
+			$GLOBALS['table_prefix']."httpbl_log;");
+	}
+
+	// Drop the log table
+	function httpbl_drop_log_table()
+	{
+		update_option('httpbl_log', false);
+		$wpdb =& $GLOBALS['wpdb'];
+		return $wpdb->get_results("DROP TABLE ".
+			$GLOBALS['table_prefix']."httpbl_log;");
+	}
+	
+	// Create a new log table
+	function httpbl_create_log_table()
+	{
+		$file = substr(__FILE__, 0, strrpos(__FILE__, "/")).
+			"/httpbl_log.sql";
+		if (is_file($file)) {
+			$sql = file($file);
+			$sql = implode(" ", $sql);
+			$sql = str_replace("%PREFIX%",
+				$GLOBALS['table_prefix'], $sql);
+			$wpdb =& $GLOBALS['wpdb'];
+			return $wpdb->get_results($sql);
+		} else {
+			echo "<strong>File <code>httpbl_log.sql</code> does not exist! Please download it as it's required to created the table.</strong>";
+		}
 	}
 	
 	// The visitor verification function
@@ -131,10 +183,9 @@ License: This program is free software; you can redistribute it and/or modify it
 
 	function httpbl_configuration()
 	{
-		if($_POST["httpbl_save"])
-		{
-			// If the save button was clicked
-			// the options are updated.
+		// If the save button was clicked...
+		if (isset($_POST["httpbl_save"])) {
+			// ...the options are updated.
 			update_option('httpbl_key', $_POST["key"] );
 			update_option('httpbl_age_thres', $_POST["age_thres"] );
 			update_option('httpbl_threat_thres',
@@ -152,11 +203,27 @@ License: This program is free software; you can redistribute it and/or modify it
 				$_POST["not_logged_ips"] );
 		}
 		
+		// Should we purge the log table?
+		if (isset($_POST["httpbl_truncate"]))
+			httpbl_truncate_log_table();
+
+		// Should we delete the log table?
+		if (isset($_POST["httpbl_drop"]))
+			httpbl_drop_log_table();
+		
+		// Should we delete the log table?
+		if (isset($_POST["httpbl_create"]))
+			httpbl_create_log_table();
+		
+		// If we log, but there's no table.
+		if (get_option('httpbl_log') and !httpbl_check_log_table()) {
+			httpbl_create_log_table();
+		}
+
 		// If it seems like the first launch,
 		// few options should be set as defaults.
-		if ( get_option( "httpbl_key" ) == "" ) {
+		if ( get_option( "httpbl_key" ) == "" )
 			update_option( "httpbl_key" , "abcdefghijkl" );
-		}
 		if ( get_option( "httpbl_age_thres" ) == 0 )
 			update_option( "httpbl_age_thres" , "14" );
 		if ( get_option( "httpbl_threat_thres" ) == 0 )
@@ -181,11 +248,18 @@ License: This program is free software; you can redistribute it and/or modify it
 ?>
 <div class='wrap'>
 	<h2>http:BL WordPress Plugin</h2>
-	<p><a href="#conf">Configuration</a> | <a href="#log">Log</a></p>
+	<p><a href="#conf">Configuration</a>
+<?php
+	if (get_option("httpbl_log")) {
+?>
+| <a href="#log">Log</a></p>
+<?php
+	}
+?>
 	<p>The http:BL WordPress Plugin allows you to verify IP addresses of clients connecting to your blog against the <a href="http://www.projecthoneypot.org">Project Honey Pot</a> database.</p>
 	<a name="conf"></a>
 	<h3>Configuration</h3>
-	<form action='' method='post' id='httpbl'>
+	<form action='' method='post' id='httpbl_conf'>
 		<p>http:BL Access Key <input type='text' name='key' value='<?php echo $key ?>' /> </p>
 		<p><small>An Access Key is required to perform a http:BL query. You can get your key at <a href="http://www.projecthoneypot.org/httpbl_configure.php">http:BL Access Management page</a>. You need to register a free account at the Project Honey Pot website to get one.</small></p>
 		<p>Age threshold <input type='text' name='age_thres' value='<?php echo $age_thres ?>'/></p>
@@ -209,9 +283,30 @@ License: This program is free software; you can redistribute it and/or modify it
 	<div style="float:right"><a href="http://www.projecthoneypot.org/?rf=28499"><img src="<?php echo get_option("siteurl") . "/wp-content/plugins/httpBL/";?>project_honey_pot_button.png" height="31px" width="88px" border="0" alt="Stop Spam Harvesters, Join Project Honey Pot"></a></div>
 		<p><input type='submit' name='httpbl_save' value='Save Settings' /></p>
 	</form>
+<?php
+	if (get_option("httpbl_log")) {
+?>
 	<hr/>
 	<a name="log"></a>
 	<h3>Log</h3>
+	<form action='' method='post' name='httpbl_log'><p>
+<?php
+	// Does a log table exist?
+	$httpbl_table_exists = httpbl_check_log_table();
+	if ($httpbl_table_exists === true) {
+?>
+	<script language="JavaScript"><!--
+	var response;
+	// Delete or purge confirmation.
+	function httpblConfirm(action) {
+		response = confirm("Do you really want to "+action+
+			" the log table ?");
+		return response;
+	}
+	//--></script>
+	<input type='submit' name='httpbl_truncate' value='Purge the log table' onClick='return httpblConfirm("purge")'/>
+	<input type='submit' name='httpbl_drop' value='Delete the log table' style="margin:0 0 0 30px" onClick='return httpblConfirm("delete")'/>
+	</p></form>
 	<p>A list of 50 most recent visitors listed in the Project Honey Pot's database.</p>
 	<table cellpadding="5px" cellspacing="3px">
 	<tr>
@@ -239,6 +334,17 @@ License: This program is free software; you can redistribute it and/or modify it
 	}
 ?>
 	</table>
+<?php
+	} else if ($httpbl_table_exists === false) {
+?>
+	It seems that you haven't got a log table yet. Maybe you'd like to <input type='submit' name='httpbl_create' value='create it' /> ?
+	</p></form>
+<?php
+	}
+
+	// End of if (get_option("httpbl_log"))
+	}
+?>
 </div>
 <?php
 	}	

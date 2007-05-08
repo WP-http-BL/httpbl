@@ -1,7 +1,8 @@
 /*
- * Remember to replace wp_ accordingly to your WordPress setup.
+ * If you are creating the table manually,
+ * do remember to replace %PREFIX% accordingly to your WordPress setup.
  */
-CREATE TABLE `wp_httpbl_log` (
+CREATE TABLE `%PREFIX%httpbl_log` (
 	`id` INT( 6 ) NOT NULL AUTO_INCREMENT PRIMARY KEY ,
 	`ip` VARCHAR( 16 ) NOT NULL DEFAULT 'unknown' ,
 	`time` DATETIME NOT NULL ,
