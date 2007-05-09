@@ -26,7 +26,7 @@ License: This program is free software; you can redistribute it and/or modify it
 			time() + get_option('gmt_offset') * 60 * 60 );
 		$blocked = ($blocked ? 1 : 0);
 		$wpdb =& $GLOBALS['wpdb'];
-		$user_agent = htmlentities($user_agent, ENT_QUOTES);
+		$user_agent = mysql_real_escape_string($user_agent);
 		$query = "INSERT INTO ".$GLOBALS['table_prefix']."httpbl_log ".
 			"(ip, time, user_agent, httpbl_response, blocked)".
 			" VALUES ( '$ip', '$time', '$user_agent',".
@@ -151,11 +151,14 @@ License: This program is free software; you can redistribute it and/or modify it
 			// Are we logging?
 			if (get_option("httpbl_log") == true) {
 
+				// At first we assume that the visitor
+				// should be logged
+				$log = true;
+
 				// Checking if he's not one of those, who
 				// are not logged
 				$ips = explode(" ",
 					get_option("httpbl_not_logged_ips"));
-				$log = true;
 				foreach ($ips as $ip) {
 					if ($ip == $_SERVER["REMOTE_ADDR"])
 						$log = false;
@@ -163,6 +166,12 @@ License: This program is free software; you can redistribute it and/or modify it
 
 				// Don't log search engine bots
 				if ($result[3] == 0) $log = false;
+
+				// If we log only blocked ones
+				if (get_option("httpbl_log_blocked_only")
+					and !$blocked) {
+					$log = false;
+				}
 
 				// If he can be logged, we log him
 				if ($log)
@@ -199,6 +208,9 @@ License: This program is free software; you can redistribute it and/or modify it
 			update_option('httpbl_hp', $_POST["hp"] );
 			update_option('httpbl_log',
 				( $_POST["enable_log"] == 1 ? true : false ));
+			update_option('httpbl_log_blocked_only',
+				( $_POST["log_blocked_only"] == 1 ?
+				true : false ));
 			update_option('httpbl_not_logged_ips',
 				$_POST["not_logged_ips"] );
 		}
@@ -243,6 +255,9 @@ License: This program is free software; you can redistribute it and/or modify it
 		$not_logged_ips = get_option('httpbl_not_logged_ips');
 		$log_checkbox = ( get_option('httpbl_log') ?
 			"checked='true'" : "");
+		$log_blocked_only_checkbox = ( 
+			get_option('httpbl_log_blocked_only') ?
+			"checked='true'" : "");
 
 		// The page contents.
 ?>
@@ -278,6 +293,8 @@ License: This program is free software; you can redistribute it and/or modify it
 		<p><small>If you've got a Honey Pot or a Quick Link you may redirect all unwelcome visitors to it. If you leave the following field empty all harmful visitors will be given a blank page instead of your blog.</small></p>
 		<p>Enable logging <input type='checkbox' name='enable_log' value='1' <?php echo $log_checkbox ?>/></p>
 		<p><small>If you enable logging all visitors which are recorded in the Project Honey Pot's database will be logged in the database and listed in the table below. Remember to create a proper table in the database before you enable this option!</small></p>
+		<p>Log only blocked visitors <input type='checkbox' name='log_blocked_only' value='1' <?php echo $log_blocked_only_checkbox ?>/></p>
+		<p><small>Enabling this option will result in logging only blocked visitors. The rest shall be forgotten.</small></p>
 		<p>Not logged IP addresses <input type='text' name='not_logged_ips' value='<?php echo $not_logged_ips ?>'/></p>
 		<p><small>Enter a space-separated list of IP addresses which will not be recorded in the log.</small></p>
 		<p><small>More details are available at the <a href="http://www.projecthoneypot.org/httpbl_api.php">http:BL API Specification page</a>.</small></p>
@@ -327,6 +344,8 @@ License: This program is free software; you can redistribute it and/or modify it
 		$i++;
 		echo "\n\t<tr$style>";
 		foreach ($row as $key => $val) {
+			if ($key == "user_agent")
+				$val = htmlentities($val, ENT_QUOTES);
 			if ($key == "blocked")
 				$val = ($val ? "<strong>YES</strong>" : "No");
 			echo "\n\t\t<td><small>$val</small></td>";
