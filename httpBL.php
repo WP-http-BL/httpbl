@@ -311,6 +311,8 @@ License: This program is free software; you can redistribute it and/or modify it
 <?php
 	// Does a log table exist?
 	$httpbl_table_exists = httpbl_check_log_table();
+	// If it exists display a log purging form and output log
+	// in a nice XHTML table.
 	if ($httpbl_table_exists === true) {
 ?>
 	<script language="JavaScript"><!--
@@ -339,18 +341,23 @@ License: This program is free software; you can redistribute it and/or modify it
 	</tr>
 <?php
 	// Table with logs.
+	// Get data from the database.
 	$results = httpbl_get_log();
 	$i = 0;
 	$threat_type = array( "", "S", "H", "S/H", "C", "S/C", "H/C", "S/H/C");
 	foreach ($results as $row) {
+		// Odd and even rows look differently.
 		$style = ($i++ % 2 ? " class='alternate'" : "" );
 		echo "\n\t<tr$style>";
 		foreach ($row as $key => $val) {
 			if ($key == "user_agent")
+				// In case the user agent string contains
+				// unwelcome characters.
 				$val = htmlentities($val, ENT_QUOTES);
 			if ($key == "blocked")
 				$val = ($val ? "<strong>YES</strong>" : "No");
 			if ($key == "httpbl_response") {
+				// Make the http:BL response human-readible.
 				$octets = explode( ".", $val);
 				$plural = ( $octets[1] == 1 ? "" : "s");
 				$lastseen = $octets[1]." day$plural";
@@ -360,6 +367,8 @@ License: This program is free software; you can redistribute it and/or modify it
 					$threat_type[$octets[3]].
 					"</small></td>";
 			} else {
+				// If it's not an http:BL response it's
+				// displayed in one column.
 				$td = "\n\t\t<td><small>$val</small></td>";
 			}
 			echo $td;
