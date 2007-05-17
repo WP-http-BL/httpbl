@@ -2,7 +2,7 @@
 /*
 Plugin Name: http:BL WordPress Plugin
 Plugin URI: http://stepien.com.pl/2007/04/28/httpbl_wordpress_plugin/
-Description: http:BL WordPress Plugin allows you to verify IP addresses of clients connecting to your blog against the <a href="http://www.projecthoneypot.org">Project Honey Pot</a> database. 
+Description: http:BL WordPress Plugin allows you to verify IP addresses of clients connecting to your blog against the <a href="http://www.projecthoneypot.org/?rf=28499">Project Honey Pot</a> database. 
 Author: Jan Stępień
 Version: SVN
 Author URI: http://stepien.com.pl
@@ -272,7 +272,7 @@ License: This program is free software; you can redistribute it and/or modify it
 <?php
 	}
 ?>
-	<p>The http:BL WordPress Plugin allows you to verify IP addresses of clients connecting to your blog against the <a href="http://www.projecthoneypot.org">Project Honey Pot</a> database.</p>
+	<p>The http:BL WordPress Plugin allows you to verify IP addresses of clients connecting to your blog against the <a href="http://www.projecthoneypot.org/?rf=28499">Project Honey Pot</a> database.</p>
 	<a name="conf"></a>
 	<h3>Configuration</h3>
 	<form action='' method='post' id='httpbl_conf'>
@@ -332,28 +332,44 @@ License: This program is free software; you can redistribute it and/or modify it
 		<th>IP</th>
 		<th>Date</th>
 		<th>User agent</th>
-		<th>http:BL</th>
+		<th>Last seen<sup>1</sup></th>
+		<th>Threat</th>
+		<th>Type<sup>2</sup></th>
 		<th>Blocked</th>
 	</tr>
 <?php
 	// Table with logs.
 	$results = httpbl_get_log();
 	$i = 0;
+	$threat_type = array( "", "S", "H", "S/H", "C", "S/C", "H/C", "S/H/C");
 	foreach ($results as $row) {
-		$style = ($i % 2 ? " class='alternate'" : "" );
-		$i++;
+		$style = ($i++ % 2 ? " class='alternate'" : "" );
 		echo "\n\t<tr$style>";
 		foreach ($row as $key => $val) {
 			if ($key == "user_agent")
 				$val = htmlentities($val, ENT_QUOTES);
 			if ($key == "blocked")
 				$val = ($val ? "<strong>YES</strong>" : "No");
-			echo "\n\t\t<td><small>$val</small></td>";
+			if ($key == "httpbl_response") {
+				$octets = explode( ".", $val);
+				$plural = ( $octets[1] == 1 ? "" : "s");
+				$lastseen = $octets[1]." day$plural";
+				$td = "\n\t\t<td><small>$lastseen</small></td>".
+					"\n\t\t<td><small>".$octets[2].
+					"</small></td>\n\t\t<td><small>".
+					$threat_type[$octets[3]].
+					"</small></td>";
+			} else {
+				$td = "\n\t\t<td><small>$val</small></td>";
+			}
+			echo $td;
 		}
 		echo "\n\t</tr>";
 	}
 ?>
 	</table>
+	<p><small><sup>1</sup> Counting from the day of visit.</small></p>
+	<p><small><sup>2</sup> S - suspicious, H - harvester, C - comment spammer.</small></p>
 <?php
 	} else if ($httpbl_table_exists === false) {
 ?>
