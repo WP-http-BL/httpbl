@@ -9,19 +9,15 @@ Author URI: http://stepien.com.pl
 License: This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
 */
 	
-	add_action("init", "httpbl_check_visitor");
+	add_action("init", "httpbl_check_visitor",1);
+	if ( get_option('httpbl_stats') )
+		add_action("init", "httpbl_get_stats",10);
 	add_action("admin_menu", "httpbl_config_page");
 	
-	function httpbl_debug($message)
-	{
-		// This function will display debug messages
-		// in HTML comments somewhere in the output.
-		// Most probably in the header.
-	}
-
 	// Add a line to the log table
 	function httpbl_add_log($ip, $user_agent, $response, $blocked)
 	{
+		global $GLOBALS;
 		$time = gmdate("Y-m-d H:i:s",
 			time() + get_option('gmt_offset') * 60 * 60 );
 		$blocked = ($blocked ? 1 : 0);
@@ -37,15 +33,67 @@ License: This program is free software; you can redistribute it and/or modify it
 	// Get latest 50 entries from the log table
 	function httpbl_get_log()
 	{
+		global $GLOBALS;
 		$query = "SELECT * FROM ".$GLOBALS['table_prefix'].
 			"httpbl_log ORDER BY id DESC LIMIT 50";
 		$wpdb =& $GLOBALS['wpdb'];
 		return $wpdb->get_results($query);
 	}
 	
+	// Get numbers of blocked and passed visitors from the log table
+	// and place them in $httpbl_stats_data[]
+	function httpbl_get_stats()
+	{
+		global $GLOBALS, $httpbl_stats_data;
+		$query = "SELECT blocked,count(*) FROM ".$GLOBALS['table_prefix'].
+			"httpbl_log GROUP BY blocked";
+		$wpdb =& $GLOBALS['wpdb'];
+		$results = $wpdb->get_results($query,ARRAY_N);
+		foreach ($results as $row) {
+			if ($row[0] == 1) {
+				$httpbl_stats_data['blocked'] = $row[1];
+			} else {
+				$httpbl_stats_data['passed'] = $row[1];
+			}
+		}
+		$results = NULL;
+	}
+	
+	// Display stats. Output may be configured at the plugin's config page.
+	function httpbl_stats()
+	{
+		global $httpbl_stats_data;
+		$pattern = get_option('httpbl_stats_pattern');
+		$link = get_option('httpbl_stats_link');
+		$search = array(
+			'$block',
+			'$pass',
+			'$total'
+			);
+		$replace = array(
+			$httpbl_stats_data['blocked'],
+			$httpbl_stats_data['passed'],
+			$httpbl_stats_data['blocked']+$httpbl_stats_data['passed']
+			);
+		$link_prefix = array(
+			"",
+			"<a href='http://www.projecthoneypot.org/'>",
+			"<a href='http://stepien.com.pl/2007/04/28/httpbl_wordpress_plugin/'>"
+			);
+		$link_suffix = array(
+			"",
+			"</a>",
+			"</a>"
+			);
+		echo $link_prefix[$link].
+			str_replace($search, $replace, $pattern).
+			$link_suffix[$link];
+	}
+	
 	// Check whether the table exists
 	function httpbl_check_log_table()
 	{
+		global $GLOBALS;
 		$wpdb =& $GLOBALS['wpdb'];
 		$result = $wpdb->get_results("SHOW TABLES");
 		foreach ($result as $stdobject) {
@@ -62,6 +110,7 @@ License: This program is free software; you can redistribute it and/or modify it
 	// Truncate the log table
 	function httpbl_truncate_log_table()
 	{
+		global $GLOBALS;
 		$wpdb =& $GLOBALS['wpdb'];
 		return $wpdb->get_results("TRUNCATE ".
 			$GLOBALS['table_prefix']."httpbl_log;");
@@ -70,6 +119,7 @@ License: This program is free software; you can redistribute it and/or modify it
 	// Drop the log table
 	function httpbl_drop_log_table()
 	{
+		global $GLOBALS;
 		update_option('httpbl_log', false);
 		$wpdb =& $GLOBALS['wpdb'];
 		return $wpdb->get_results("DROP TABLE ".
@@ -79,6 +129,7 @@ License: This program is free software; you can redistribute it and/or modify it
 	// Create a new log table
 	function httpbl_create_log_table()
 	{
+		global $GLOBALS;
 		$file = substr(__FILE__, 0, strrpos(__FILE__, "/")).
 			"/httpbl_log.sql";
 		// Chech if there's the file with the log table structure
@@ -213,6 +264,12 @@ License: This program is free software; you can redistribute it and/or modify it
 				true : false ));
 			update_option('httpbl_not_logged_ips',
 				$_POST["not_logged_ips"] );
+			update_option('httpbl_stats',
+				( $_POST["enable_stats"] == 1 ? true : false ));
+			update_option('httpbl_stats_pattern',
+				$_POST["stats_pattern"] );
+			update_option('httpbl_stats_link',
+				$_POST["stats_link"] );
 		}
 		
 		// Should we purge the log table?
@@ -258,6 +315,17 @@ License: This program is free software; you can redistribute it and/or modify it
 		$log_blocked_only_checkbox = ( 
 			get_option('httpbl_log_blocked_only') ?
 			"checked='true'" : "");
+		$stats_checkbox = ( get_option('httpbl_stats') ?
+			"checked='true'" : "");
+		$stats_pattern = get_option('httpbl_stats_pattern');
+		$stats_link = get_option('httpbl_stats_link');
+		$stats_link_radio = array();
+		for ($i = 0; $i < 3; $i++) {
+			if ($stats_link == $i) {
+				$stats_link_radio[$i] = "checked='true'";
+				break;
+			}
+		}
 
 		// The page contents.
 ?>
@@ -276,6 +344,7 @@ License: This program is free software; you can redistribute it and/or modify it
 	<a name="conf"></a>
 	<h3>Configuration</h3>
 	<form action='' method='post' id='httpbl_conf'>
+	<h4>Main options</h4>
 		<p>http:BL Access Key <input type='text' name='key' value='<?php echo $key ?>' /> </p>
 		<p><small>An Access Key is required to perform a http:BL query. You can get your key at <a href="http://www.projecthoneypot.org/httpbl_configure.php">http:BL Access Management page</a>. You need to register a free account at the Project Honey Pot website to get one.</small></p>
 		<p>Age threshold <input type='text' name='age_thres' value='<?php echo $age_thres ?>'/></p>
@@ -291,13 +360,26 @@ License: This program is free software; you can redistribute it and/or modify it
 		<p><small>The field above allows you to specify which types of visitors should be regarded as harmful. It is recommended to tick all of them.</small></p>
 		<p>Honey Pot <input type='text' name='hp' value='<?php echo $hp ?>'/></p>
 		<p><small>If you've got a Honey Pot or a Quick Link you may redirect all unwelcome visitors to it. If you leave the following field empty all harmful visitors will be given a blank page instead of your blog.</small></p>
+		<p><small>More details are available at the <a href="http://www.projecthoneypot.org/httpbl_api.php">http:BL API Specification page</a>.</small></p>
+	<h4>Logging options</h4>
 		<p>Enable logging <input type='checkbox' name='enable_log' value='1' <?php echo $log_checkbox ?>/></p>
 		<p><small>If you enable logging all visitors which are recorded in the Project Honey Pot's database will be logged in the database and listed in the table below. Remember to create a proper table in the database before you enable this option!</small></p>
 		<p>Log only blocked visitors <input type='checkbox' name='log_blocked_only' value='1' <?php echo $log_blocked_only_checkbox ?>/></p>
 		<p><small>Enabling this option will result in logging only blocked visitors. The rest shall be forgotten.</small></p>
 		<p>Not logged IP addresses <input type='text' name='not_logged_ips' value='<?php echo $not_logged_ips ?>'/></p>
 		<p><small>Enter a space-separated list of IP addresses which will not be recorded in the log.</small></p>
-		<p><small>More details are available at the <a href="http://www.projecthoneypot.org/httpbl_api.php">http:BL API Specification page</a>.</small></p>
+	<h4>Statistics options</h4>
+		<p>Enable stats <input type='checkbox' name='enable_stats' value='1' <?php echo $stats_checkbox ?>/></p>
+		<p><small>If stats are enabled the plugin will get information about its performance from the database, allowing it to be displayed using <code>httpbl_stats()</code> function.</small></p>
+		<p>Output pattern <input type='text' name='stats_pattern' value='<?php echo $stats_pattern ?>'/></p>
+		<p><small>This input field allows you to specify the output format of the statistics. You can use following variables: <code>$block</code> will be replaced with the number of blocked visitors, <code>$pass</code> with the number of logged but not blocked visitors, and <code>$total</code> with the total number of entries in the log table. HTML is welcome. PHP won't be compiled.</small></p>
+		<fieldset>
+		<label>Output link</label>
+		<p><input type="radio" name="stats_link" value="0" <?php echo $stats_link_radio[0]; ?>/> Disabled</p>
+		<p><input type="radio" name="stats_link" value="1" <?php echo $stats_link_radio[1]; ?>/> <a href="http://www.projecthoneypot.org/">Project Honey Pot</a></p>
+		<p><input type="radio" name="stats_link" value="2" <?php echo $stats_link_radio[2]; ?>/> <a href="http://stepien.com.pl/2007/04/28/httpbl_wordpress_plugin/">http:BL WordPress Plugin</a></p>
+		</fieldset>
+		<p><small>Should we enclose the output specified in the field above with a hyperlink?</small></p>
 	<div style="float:right"><a href="http://www.projecthoneypot.org/?rf=28499"><img src="<?php echo get_option("siteurl") . "/wp-content/plugins/httpBL/";?>project_honey_pot_button.png" height="31px" width="88px" border="0" alt="Stop Spam Harvesters, Join Project Honey Pot"></a></div>
 		<p><input type='submit' name='httpbl_save' value='Save Settings' /></p>
 	</form>
