@@ -1,11 +1,11 @@
 <?php
 /*
 Plugin Name: http:BL WordPress Plugin
-Plugin URI: http://stepien.com.pl/2007/04/28/httpbl_wordpress_plugin/
+Plugin URI: http://wordpress.org/extend/plugins/httpbl/
 Description: http:BL WordPress Plugin allows you to verify IP addresses of clients connecting to your blog against the <a href="http://www.projecthoneypot.org/?rf=28499">Project Honey Pot</a> database. 
 Author: Jan Stępień
 Version: SVN
-Author URI: http://stepien.com.pl
+Author URI: http://stepien.cc/~jan
 License: This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
 */
 	
@@ -77,8 +77,8 @@ License: This program is free software; you can redistribute it and/or modify it
 			);
 		$link_prefix = array(
 			"",
-			"<a href='http://www.projecthoneypot.org/'>",
-			"<a href='http://stepien.com.pl/2007/04/28/httpbl_wordpress_plugin/'>"
+			"<a href='http://www.projecthoneypot.org/?rf=28499'>",
+			"<a href='http://wordpress.org/extend/plugins/httpbl/'>"
 			);
 		$link_suffix = array(
 			"",
@@ -376,8 +376,8 @@ License: This program is free software; you can redistribute it and/or modify it
 		<fieldset>
 		<label>Output link</label>
 		<p><input type="radio" name="stats_link" value="0" <?php echo $stats_link_radio[0]; ?>/> Disabled</p>
-		<p><input type="radio" name="stats_link" value="1" <?php echo $stats_link_radio[1]; ?>/> <a href="http://www.projecthoneypot.org/">Project Honey Pot</a></p>
-		<p><input type="radio" name="stats_link" value="2" <?php echo $stats_link_radio[2]; ?>/> <a href="http://stepien.com.pl/2007/04/28/httpbl_wordpress_plugin/">http:BL WordPress Plugin</a></p>
+		<p><input type="radio" name="stats_link" value="1" <?php echo $stats_link_radio[1]; ?>/> <a href="http://www.projecthoneypot.org/?rf=28499">Project Honey Pot</a></p>
+		<p><input type="radio" name="stats_link" value="2" <?php echo $stats_link_radio[2]; ?>/> <a href="http://wordpress.org/extend/plugins/httpbl/">http:BL WordPress Plugin</a></p>
 		</fieldset>
 		<p><small>Should we enclose the output specified in the field above with a hyperlink?</small></p>
 	<div style="float:right"><a href="http://www.projecthoneypot.org/?rf=28499"><img src="<?php echo get_option("siteurl") . "/wp-content/plugins/httpbl/";?>project_honey_pot_button.png" height="31px" width="88px" border="0" alt="Stop Spam Harvesters, Join Project Honey Pot"></a></div>
