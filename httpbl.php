@@ -380,7 +380,7 @@ License: This program is free software; you can redistribute it and/or modify it
 		<p><input type="radio" name="stats_link" value="2" <?php echo $stats_link_radio[2]; ?>/> <a href="http://stepien.com.pl/2007/04/28/httpbl_wordpress_plugin/">http:BL WordPress Plugin</a></p>
 		</fieldset>
 		<p><small>Should we enclose the output specified in the field above with a hyperlink?</small></p>
-	<div style="float:right"><a href="http://www.projecthoneypot.org/?rf=28499"><img src="<?php echo get_option("siteurl") . "/wp-content/plugins/httpBL/";?>project_honey_pot_button.png" height="31px" width="88px" border="0" alt="Stop Spam Harvesters, Join Project Honey Pot"></a></div>
+	<div style="float:right"><a href="http://www.projecthoneypot.org/?rf=28499"><img src="<?php echo get_option("siteurl") . "/wp-content/plugins/httpbl/";?>project_honey_pot_button.png" height="31px" width="88px" border="0" alt="Stop Spam Harvesters, Join Project Honey Pot"></a></div>
 		<p><input type='submit' name='httpbl_save' value='Save Settings' /></p>
 	</form>
 <?php
