@@ -130,19 +130,19 @@ License: This program is free software; you can redistribute it and/or modify it
 	function httpbl_create_log_table()
 	{
 		global $GLOBALS;
-		$file = substr(__FILE__, 0, strrpos(__FILE__, "/")).
-			"/httpbl_log.sql";
-		// Chech if there's the file with the log table structure
-		if (is_file($file)) {
-			$sql = file($file);
-			$sql = implode(" ", $sql);
-			$sql = str_replace("%PREFIX%",
-				$GLOBALS['table_prefix'], $sql);
-			$wpdb =& $GLOBALS['wpdb'];
-			return $wpdb->get_results($sql);
-		} else {
-			echo "<strong>File <code>httpbl_log.sql</code> does not exist! Please download it as it's required to created the table.</strong>";
-		}
+		// No "IF NOT EXISTS" as we create it only if it does
+		// not exist.
+		$sql = 'CREATE TABLE `' . $GLOBALS['table_prefix'] . 'httpbl_log` ('
+			.'	`id` INT( 6 ) NOT NULL AUTO_INCREMENT PRIMARY KEY ,'
+			.'	`ip` VARCHAR( 16 ) NOT NULL DEFAULT \'unknown\' ,'
+			.'	`time` DATETIME NOT NULL ,'
+			.'	`user_agent` VARCHAR( 255 ) NOT NULL DEFAULT \'unknown\' ,'
+			.'	`httpbl_response` VARCHAR( 16 ) NOT NULL ,'
+			.'	`blocked` BOOL NOT NULL'
+			.')';
+		$wpdb =& $GLOBALS['wpdb'];
+		// TODO check for errors.
+		$wpdb->query($sql);
 	}
 	
 	// The visitor verification function
