@@ -1,5 +1,5 @@
 === http:BL WordPress Plugin ===
-Contributors: janstepien
+Contributors: janstepien, madeinthayaland
 Tags: comments, spam
 Requires at least: 2.0
 Tested up to: 2.6.2
