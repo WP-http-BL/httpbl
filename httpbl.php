@@ -432,6 +432,10 @@ License: This program is free software; you can redistribute it and/or modify it
 		$style = ($i++ % 2 ? " class='alternate'" : "" );
 		echo "\n\t<tr$style>";
 		foreach ($row as $key => $val) {
+			if ($key == "ip")
+				// IP address lookup in the Project Honey Pot database.
+				$val = "<a href='http://www.projecthoneypot.org/ip_" . $val .
+					"' target='_blank'>" . $val . "</a>";
 			if ($key == "user_agent")
 				// In case the user agent string contains
 				// unwelcome characters.
