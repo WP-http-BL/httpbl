@@ -49,7 +49,7 @@ License: This program is free software; you can redistribute it and/or modify it
 			"httpbl_log GROUP BY blocked";
 		$wpdb =& $GLOBALS['wpdb'];
 		$results = $wpdb->get_results($query,ARRAY_N);
-		foreach ($results as $row) {
+		foreach ((array)$results as $row) {
 			if ($row[0] == 1) {
 				$httpbl_stats_data['blocked'] = $row[1];
 			} else {
