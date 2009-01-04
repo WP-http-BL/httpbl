@@ -3,7 +3,7 @@ Contributors: janstepien, madeinthayaland
 Tags: comments, spam
 Requires at least: 2.0
 Tested up to: 2.6.5
-Stable tag: 1.5
+Stable tag: 1.6
 
 http:BL WordPress Plugin allows you to verify IP addresses of clients
 connecting to your blog against the Project Honey Pot database.
