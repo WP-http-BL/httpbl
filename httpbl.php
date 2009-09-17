@@ -162,6 +162,9 @@ License: This program is free software; you can redistribute it and/or modify it
 			// Get thresholds
 			$age_thres = get_option('httpbl_age_thres');
 			$threat_thres = get_option('httpbl_threat_thres');
+			$threat_thres_s = get_option('httpbl_threat_thres_s');
+			$threat_thres_h = get_option('httpbl_threat_thres_h');
+			$threat_thres_c = get_option('httpbl_threat_thres_c');
 
 			for ($i = 0; pow(2, $i) <= 4; $i++) {
 				$value = pow(2, $i);
@@ -179,8 +182,24 @@ License: This program is free software; you can redistribute it and/or modify it
 			
 			if ( $result[1] < $age_thres )
 				$age = true;
-			if ( $result[2] > $threat_thres )
-				$threat = true;
+
+			if ( $threat_thres_s && ($result[3] & 1) ) {
+				// Check suspicious threat
+				if ( $result[2] > $threat_thres_s )
+					$threat = true;
+			} else if ( $threat_thres_h && ($result[3] & 2) ) {
+				// Check harvester threat
+				if ( $result[2] > $threat_thres_h )
+					$threat = true;
+			} else if ( $threat_thres_c && ($result[3] & 4) ) {
+				// Check comment spammer threat
+				if ( $result[2] > $threat_thres_c )
+					$threat = true;
+			} else {
+				if ( $result[2] > $threat_thres )
+					$threat = true;
+			}
+
 			foreach ( $denied as $key => $value ) {
 				if ( ($result[3] - $result[3] % $key) > 0
 					and $value)
@@ -250,6 +269,13 @@ License: This program is free software; you can redistribute it and/or modify it
 			update_option('httpbl_age_thres', $_POST["age_thres"] );
 			update_option('httpbl_threat_thres',
 				$_POST["threat_thres"] );
+			update_option('httpbl_threat_thres_s', 
+				$_POST["threat_thres_s"] );
+			update_option('httpbl_threat_thres_h', 
+				$_POST["threat_thres_h"] );
+			update_option('httpbl_threat_thres_c', 
+				$_POST["threat_thres_c"] );
+
 			for ($i = 0; pow(2, $i) <= 4; $i++) {
 				$value = pow(2, $i);
 				$denied[$value] = update_option('httpbl_deny_'.
@@ -301,6 +327,9 @@ License: This program is free software; you can redistribute it and/or modify it
 		// Get data to be displayed in the form.
 		$key = get_option('httpbl_key');
 		$threat_thres = get_option('httpbl_threat_thres');
+		$threat_thres_s = get_option('httpbl_threat_thres_s');
+		$threat_thres_h = get_option('httpbl_threat_thres_h');
+		$threat_thres_c = get_option('httpbl_threat_thres_c');
 		$age_thres = get_option('httpbl_age_thres');
 		for ($i = 0; pow(2, $i) <= 4; $i++) {
 			$value = pow(2, $i);
@@ -349,8 +378,14 @@ License: This program is free software; you can redistribute it and/or modify it
 		<p><small>An Access Key is required to perform a http:BL query. You can get your key at <a href="http://www.projecthoneypot.org/httpbl_configure.php">http:BL Access Management page</a>. You need to register a free account at the Project Honey Pot website to get one.</small></p>
 		<p>Age threshold <input type='text' name='age_thres' value='<?php echo $age_thres ?>'/></p>
 		<p><small>http:BL service provides you information about the date of the last activity of a checked IP. Due to the fact that the information in the Project Honey Pot database may be obsolete, you may set an age threshold, counted in days. If the verified IP hasn't been active for a period of time longer than the threshold it will be regarded as harmless.</small></p>
-		<p>Threat score threshold <input type='text' name='threat_thres' value='<?php echo $threat_thres ?>'/></p>
+		<p>General threat score threshold <input type='text' name='threat_thres' value='<?php echo $threat_thres ?>'/></p>
 		<p><small>Each suspicious IP address is given a threat score. This scored is asigned by Project Honey Pot basing on various factors, such as the IP's activity or the damage done during the visits. The score is a number between 0 and 255, where 0 is no threat at all and 255 is extremely harmful. In the field above you may set the threat score threshold. IP address with a score greater than the given number will be regarded as harmful.</small></p>
+		<p><ul>
+		<li>Suspicious threat score threshold <input type='text' name='threat_thres_s' value='<?php echo $threat_thres_s ?>'/></li>
+		<li>Harvester threat score threshold <input type='text' name='threat_thres_h' value='<?php echo $threat_thres_h ?>'/></li>
+		<li>Comment spammer threat score threshold <input type='text' name='threat_thres_c' value='<?php echo $threat_thres_c ?>'/></li>
+		</ul></p>
+		<p><small>These values override the general threat score threshold. Leave blank to use the general threat score threshold.</small></p>
 		<fieldset>
 		<label>Types of visitors to be treated as malicious</label>
 		<p><input type='checkbox' name='deny_1' value='1' <?php echo $deny_checkbox[1] ?>/> Suspicious</p>
