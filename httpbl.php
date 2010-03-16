@@ -10,6 +10,7 @@ License: This program is free software; you can redistribute it and/or modify it
 */
 	
 	add_action("init", "httpbl_check_visitor",1);
+	add_action("wp_footer", "httpbl_honey_pot");
 	if ( get_option('httpbl_stats') )
 		add_action("init", "httpbl_get_stats",10);
 	add_action("admin_menu", "httpbl_config_page");
@@ -183,21 +184,37 @@ License: This program is free software; you can redistribute it and/or modify it
 			if ( $result[1] < $age_thres )
 				$age = true;
 
-			if ( $threat_thres_s && ($result[3] & 1) ) {
-				// Check suspicious threat
-				if ( $result[2] > $threat_thres_s )
-					$threat = true;
-			} else if ( $threat_thres_h && ($result[3] & 2) ) {
-				// Check harvester threat
-				if ( $result[2] > $threat_thres_h )
-					$threat = true;
-			} else if ( $threat_thres_c && ($result[3] & 4) ) {
-				// Check comment spammer threat
-				if ( $result[2] > $threat_thres_c )
-					$threat = true;
-			} else {
-				if ( $result[2] > $threat_thres )
-					$threat = true;
+			// Check suspicious threat
+			if ( $result[3] & 1 ) {
+				if ( $threat_thres_s ) {
+					if ( $result[2] > $threat_thres_s )
+						$threat = true;
+				} else {
+					if ( $result[2] > $threat_thres )
+						$threat = true;
+				}
+			}
+
+			// Check harvester threat
+			if ( $result[3] & 2 ) {
+				if ( $threat_thres_h ) {
+					if ( $result[2] > $threat_thres_h )
+						$threat = true;
+				} else {
+					if ( $result[2] > $threat_thres )
+						$threat = true;
+				}
+			}
+
+			// Check comment spammer threat
+			if ( $result[3] & 4 ) {
+				if ( $threat_thres_c ) {
+					if ( $result[2] > $threat_thres_c )
+						$threat = true;
+				} else {
+					if ( $result[2] > $threat_thres )
+						$threat = true;
+				}
 			}
 
 			foreach ( $denied as $key => $value ) {
@@ -215,7 +232,6 @@ License: This program is free software; you can redistribute it and/or modify it
 					header( "HTTP/1.1 301 Moved Permanently ");
 					header( "Location: $hp" );
 				}
-
 			}
 
 			// Are we logging?
@@ -253,6 +269,12 @@ License: This program is free software; you can redistribute it and/or modify it
 		}
 	}
 
+	function httpbl_honey_pot()
+	{
+		$hp = get_option('httpbl_hp');
+		if ( $hp )
+			echo '<div style="display: none;"><a href="' . $hp . '">Bear</a></div>';
+	}
 
 	function httpbl_config_page()
 	{
@@ -398,7 +420,7 @@ License: This program is free software; you can redistribute it and/or modify it
 		<p><small>More details are available at the <a href="http://www.projecthoneypot.org/httpbl_api.php">http:BL API Specification page</a>.</small></p>
 	<h4>Logging options</h4>
 		<p>Enable logging <input type='checkbox' name='enable_log' value='1' <?php echo $log_checkbox ?>/></p>
-		<p><small>If you enable logging all visitors which are recorded in the Project Honey Pot's database will be logged in the database and listed in the table below. Required database table will be created automatically.</small></p>
+		<p><small>If you enable logging all visitors which are recorded in the Project Honey Pot's database will be logged in the database and listed in the table below. Remember to create a proper table in the database before you enable this option!</small></p>
 		<p>Log only blocked visitors <input type='checkbox' name='log_blocked_only' value='1' <?php echo $log_blocked_only_checkbox ?>/></p>
 		<p><small>Enabling this option will result in logging only blocked visitors. The rest shall be forgotten.</small></p>
 		<p>Not logged IP addresses <input type='text' name='not_logged_ips' value='<?php echo $not_logged_ips ?>'/></p>

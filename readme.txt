@@ -1,6 +1,6 @@
 === http:BL WordPress Plugin ===
 Contributors: janstepien, madeinthayaland, M66B
-Tags: comments, spam
+Tags: comments, spam, http:BL
 Requires at least: 2.0
 Tested up to: 2.8.4
 Stable tag: 1.7
@@ -49,3 +49,19 @@ your own patch.
 
 Of course there is. Visit [author's website](http://stepien.cc/~jan) in order
 to find his e-mail address and Jabber ID.
+
+== Changelog ==
+
+= 1.8 =
+* If a honey pot link is specified an invisible link will be inserted on every page automatically to help the project
+* Fixed combinations of specific and generic threat types
+* Added upgrade notice to documentation
+* Added changelog to documentation
+
+= 1.7 =
+* Added options to specify threat level per threat type
+
+== Upgrade Notice ==
+
+= 1.8 =
+Adding honey pot, fixed threat combinations, updated documentation.
