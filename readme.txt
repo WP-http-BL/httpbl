@@ -52,6 +52,12 @@ to find his e-mail address and Jabber ID.
 
 == Changelog ==
 
+= 1.9 =
+* Patches from Eric Seiler including
+  * an update to new roles model
+  * less notices with WP_DEBUG == true
+  * a missing call to httpbl_check_log_table
+
 = 1.8 =
 * If a honey pot link is specified an invisible link will be inserted on every page automatically to help the project
 * Fixed combinations of specific and generic threat types
