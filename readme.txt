@@ -20,10 +20,12 @@ potentially harmful clients are denied from accessing your blog and therefore
 abusing it.
 
 
-= Your Feedback Matters =
+= Call For Maintainers =
 
-Bugs to report? Feature requests? Criticism? New ideas? We want to hear from
-you! Do not hesitate. Get in touch with us and share your views.
+As my connection with the WordPress platform and the PHP ecosystem has weakened
+I'm looking for an enthusiastic developer who'd like to dedicate her or his
+time to further development and maintenance of this plugin. Don't hesitate to
+get in touch if me if you consider yourself a good candidate.
 
 == Installation ==
 
