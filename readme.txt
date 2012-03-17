@@ -2,7 +2,7 @@
 Contributors: janstepien, madeinthayaland, M66B
 Tags: comments, spam, http:BL
 Requires at least: 2.0
-Tested up to: 2.9.2
+Tested up to: 3.3.1
 Stable tag: 1.8
 
 http:BL WordPress Plugin allows you to verify IP addresses of clients
