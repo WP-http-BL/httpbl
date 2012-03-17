@@ -71,5 +71,8 @@ to find his e-mail address and Jabber ID.
 
 == Upgrade Notice ==
 
+= 1.9 =
+Minor changes and updates. See the change log for details.
+
 = 1.8 =
 Adding honey pot, fixed threat combinations, updated documentation.
