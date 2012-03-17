@@ -2,19 +2,19 @@
 /*
 Plugin Name: http:BL WordPress Plugin
 Plugin URI: http://wordpress.org/extend/plugins/httpbl/
-Description: http:BL WordPress Plugin allows you to verify IP addresses of clients connecting to your blog against the <a href="http://www.projecthoneypot.org/?rf=28499">Project Honey Pot</a> database. 
+Description: http:BL WordPress Plugin allows you to verify IP addresses of clients connecting to your blog against the <a href="http://www.projecthoneypot.org/?rf=28499">Project Honey Pot</a> database.
 Author: Jan Stępień
 Version: SVN
 Author URI: http://stepien.cc/~jan
 License: This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
 */
-	
+
 	add_action("init", "httpbl_check_visitor",1);
 	add_action("wp_footer", "httpbl_honey_pot");
 	if ( get_option('httpbl_stats') )
 		add_action("init", "httpbl_get_stats",10);
 	add_action("admin_menu", "httpbl_config_page");
-	
+
 	// Add a line to the log table
 	function httpbl_add_log($ip, $user_agent, $response, $blocked)
 	{
@@ -40,26 +40,28 @@ License: This program is free software; you can redistribute it and/or modify it
 		$wpdb =& $GLOBALS['wpdb'];
 		return $wpdb->get_results($query);
 	}
-	
+
 	// Get numbers of blocked and passed visitors from the log table
 	// and place them in $httpbl_stats_data[]
 	function httpbl_get_stats()
 	{
-		global $GLOBALS, $httpbl_stats_data;
-		$query = "SELECT blocked,count(*) FROM ".$GLOBALS['table_prefix'].
-			"httpbl_log GROUP BY blocked";
-		$wpdb =& $GLOBALS['wpdb'];
-		$results = $wpdb->get_results($query,ARRAY_N);
-		foreach ((array)$results as $row) {
-			if ($row[0] == 1) {
-				$httpbl_stats_data['blocked'] = $row[1];
-			} else {
-				$httpbl_stats_data['passed'] = $row[1];
+		if (httpbl_check_log_table()) {
+			global $GLOBALS, $httpbl_stats_data;
+			$query = "SELECT blocked,count(*) FROM ".$GLOBALS['table_prefix'].
+				"httpbl_log GROUP BY blocked";
+			$wpdb =& $GLOBALS['wpdb'];
+			$results = $wpdb->get_results($query,ARRAY_N);
+			foreach ((array)$results as $row) {
+				if ($row[0] == 1) {
+					$httpbl_stats_data['blocked'] = $row[1];
+				} else {
+					$httpbl_stats_data['passed'] = $row[1];
+				}
 			}
+			$results = NULL;
 		}
-		$results = NULL;
 	}
-	
+
 	// Display stats. Output may be configured at the plugin's config page.
 	function httpbl_stats()
 	{
@@ -90,7 +92,7 @@ License: This program is free software; you can redistribute it and/or modify it
 			str_replace($search, $replace, $pattern).
 			$link_suffix[$link];
 	}
-	
+
 	// Check whether the table exists
 	function httpbl_check_log_table()
 	{
@@ -107,7 +109,7 @@ License: This program is free software; you can redistribute it and/or modify it
 		}
 		return false;
 	}
-	
+
 	// Truncate the log table
 	function httpbl_truncate_log_table()
 	{
@@ -126,7 +128,7 @@ License: This program is free software; you can redistribute it and/or modify it
 		return $wpdb->get_results("DROP TABLE ".
 			$GLOBALS['table_prefix']."httpbl_log;");
 	}
-	
+
 	// Create a new log table
 	function httpbl_create_log_table()
 	{
@@ -145,7 +147,7 @@ License: This program is free software; you can redistribute it and/or modify it
 		// TODO check for errors.
 		$wpdb->query($sql);
 	}
-	
+
 	// The visitor verification function
 	function httpbl_check_visitor()
 	{
@@ -172,15 +174,15 @@ License: This program is free software; you can redistribute it and/or modify it
 				$denied[$value] = get_option('httpbl_deny_'
 					. $value);
 			}
-			
+
 			$hp = get_option('httpbl_hp');
-			
+
 			// Assume that visitor's OK
 			$age = false;
 			$threat = false;
 			$deny = false;
 			$blocked = false;
-			
+
 			if ( $result[1] < $age_thres )
 				$age = true;
 
@@ -222,7 +224,7 @@ License: This program is free software; you can redistribute it and/or modify it
 					and $value)
 					$deny = true;
 			}
-			
+
 			// If he's not OK
 			if ( $deny && $age && $threat ) {
 				$blocked = true;
@@ -279,7 +281,7 @@ License: This program is free software; you can redistribute it and/or modify it
 	function httpbl_config_page()
 	{
 		add_submenu_page("plugins.php", "http:BL WordPress Plugin",
-			"http:BL", 10, __FILE__, "httpbl_configuration");
+			"http:BL", 'manage_options', __FILE__, "httpbl_configuration");
 	}
 
 	function httpbl_configuration()
@@ -287,39 +289,39 @@ License: This program is free software; you can redistribute it and/or modify it
 		// If the save button was clicked...
 		if (isset($_POST["httpbl_save"])) {
 			// ...the options are updated.
-			update_option('httpbl_key', $_POST["key"] );
-			update_option('httpbl_age_thres', $_POST["age_thres"] );
+			update_option('httpbl_key', @$_POST["key"] );
+			update_option('httpbl_age_thres', @$_POST["age_thres"] );
 			update_option('httpbl_threat_thres',
-				$_POST["threat_thres"] );
-			update_option('httpbl_threat_thres_s', 
-				$_POST["threat_thres_s"] );
-			update_option('httpbl_threat_thres_h', 
-				$_POST["threat_thres_h"] );
-			update_option('httpbl_threat_thres_c', 
-				$_POST["threat_thres_c"] );
+				@$_POST["threat_thres"] );
+			update_option('httpbl_threat_thres_s',
+				@$_POST["threat_thres_s"] );
+			update_option('httpbl_threat_thres_h',
+				@$_POST["threat_thres_h"] );
+			update_option('httpbl_threat_thres_c',
+				@$_POST["threat_thres_c"] );
 
 			for ($i = 0; pow(2, $i) <= 4; $i++) {
 				$value = pow(2, $i);
 				$denied[$value] = update_option('httpbl_deny_'.
-					$value, ($_POST["deny_".$value] == 1 ?
+					$value, (@$_POST["deny_".$value] == 1 ?
 					true : false));
 			}
-			update_option('httpbl_hp', $_POST["hp"] );
+			update_option('httpbl_hp', @$_POST["hp"] );
 			update_option('httpbl_log',
-				( $_POST["enable_log"] == 1 ? true : false ));
+				( @$_POST["enable_log"] == 1 ? true : false ));
 			update_option('httpbl_log_blocked_only',
-				( $_POST["log_blocked_only"] == 1 ?
+				( @$_POST["log_blocked_only"] == 1 ?
 				true : false ));
 			update_option('httpbl_not_logged_ips',
-				$_POST["not_logged_ips"] );
+				@$_POST["not_logged_ips"] );
 			update_option('httpbl_stats',
-				( $_POST["enable_stats"] == 1 ? true : false ));
+				( @$_POST["enable_stats"] == 1 ? true : false ));
 			update_option('httpbl_stats_pattern',
-				$_POST["stats_pattern"] );
+				@$_POST["stats_pattern"] );
 			update_option('httpbl_stats_link',
-				$_POST["stats_link"] );
+				@$_POST["stats_link"] );
 		}
-		
+
 		// Should we purge the log table?
 		if (isset($_POST["httpbl_truncate"]))
 			httpbl_truncate_log_table();
@@ -327,11 +329,11 @@ License: This program is free software; you can redistribute it and/or modify it
 		// Should we delete the log table?
 		if (isset($_POST["httpbl_drop"]))
 			httpbl_drop_log_table();
-		
+
 		// Should we create a new log table?
 		if (isset($_POST["httpbl_create"]))
 			httpbl_create_log_table();
-		
+
 		// If we log, but there's no table.
 		if (get_option('httpbl_log') and !httpbl_check_log_table()) {
 			httpbl_create_log_table();
@@ -345,7 +347,7 @@ License: This program is free software; you can redistribute it and/or modify it
 			update_option( "httpbl_age_thres" , "14" );
 		if ( get_option( "httpbl_threat_thres" ) == 0 )
 			update_option( "httpbl_threat_thres" , "30" );
-		
+
 		// Get data to be displayed in the form.
 		$key = get_option('httpbl_key');
 		$threat_thres = get_option('httpbl_threat_thres');
@@ -363,7 +365,7 @@ License: This program is free software; you can redistribute it and/or modify it
 		$not_logged_ips = get_option('httpbl_not_logged_ips');
 		$log_checkbox = ( get_option('httpbl_log') ?
 			"checked='true'" : "");
-		$log_blocked_only_checkbox = ( 
+		$log_blocked_only_checkbox = (
 			get_option('httpbl_log_blocked_only') ?
 			"checked='true'" : "");
 		$stats_checkbox = ( get_option('httpbl_stats') ?
@@ -372,10 +374,10 @@ License: This program is free software; you can redistribute it and/or modify it
 		$stats_link = get_option('httpbl_stats_link');
 		$stats_link_radio = array();
 		for ($i = 0; $i < 3; $i++) {
-			if ($stats_link == $i) {
+			if ($stats_link == $i)
 				$stats_link_radio[$i] = "checked='true'";
-				break;
-			}
+			else
+				$stats_link_radio[$i] = '';
 		}
 
 		// The page contents.
@@ -535,5 +537,5 @@ License: This program is free software; you can redistribute it and/or modify it
 ?>
 </div>
 <?php
-	}	
+	}
 ?>
