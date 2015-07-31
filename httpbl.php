@@ -3,8 +3,8 @@
 Plugin Name: http:BL WordPress Plugin
 Plugin URI: http://wordpress.org/extend/plugins/httpbl/
 Description: http:BL WordPress Plugin allows you to verify IP addresses of clients connecting to your blog against the <a href="http://www.projecthoneypot.org/?rf=28499">Project Honey Pot</a> database.
-Author: Jan Stępień
-Version: SVN
+Author: Jan Stępień, Viktor Szépe, Brian Layman 
+Version: 1.9.1
 Author URI: http://stepien.cc/~jan
 License: This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
 */

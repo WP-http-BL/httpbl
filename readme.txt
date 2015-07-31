@@ -1,9 +1,9 @@
 === http:BL WordPress Plugin ===
-Contributors: janstepien, madeinthayaland, M66B
+Contributors: janstepien, madeinthayaland, M66B, BrianLayman, szepe.viktor
 Tags: comments, spam, http:BL
 Requires at least: 2.0
 Tested up to: 3.3.1
-Stable tag: 1.9
+Stable tag: 1.9.1
 
 http:BL WordPress Plugin allows you to verify IP addresses of clients
 connecting to your blog against the Project Honey Pot database.
@@ -19,13 +19,20 @@ and response even quicker. Now, thanks to http:BL WordPress Plugin any
 potentially harmful clients are denied from accessing your blog and therefore
 abusing it.
 
+This plugin is in the process of being refreshed. Compatibility with current 
+versions of WordPress is unknown. Versions prior to 2.0 should be used only 
+with extreme caution.  There are known security issues and vulnerabilities.
 
-= Call For Maintainers =
 
-As my connection with the WordPress platform and the PHP ecosystem has weakened
-I'm looking for an enthusiastic developer who'd like to dedicate her or his
-time to further development and maintenance of this plugin. Don't hesitate to
-get in touch if me if you consider yourself a good candidate.
+= New Maintainers =
+
+Viktor Szépe and Brian Layman are now maintaining this plugin.  
+If you have any suggestions or comments, please add them on the WordPress Support Forum here:
+https://wordpress.org/support/plugin/httpbl
+
+Or as a GitHub issue here:
+https://github.com/WP-http-BL/httpbl/issues
+
 
 == Installation ==
 
@@ -53,6 +60,8 @@ Of course there is. Visit [author's website](http://stepien.cc/~jan) in order
 to find his e-mail address and Jabber ID.
 
 == Changelog ==
+= 1.9.1 =
+* New Maintainer initial check in.
 
 = 1.9 =
 * Patches from Eric Seiler including
