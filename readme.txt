@@ -61,7 +61,7 @@ to find his e-mail address and Jabber ID.
 
 == Changelog ==
 = 1.9.1.1 =
-* No changes. Webhook Sync test.
+* No changes. Webhook Sync test. Take 2
 
 = 1.9.1 =
 * New Maintainer initial check in.
