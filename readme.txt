@@ -3,7 +3,7 @@ Contributors: janstepien, madeinthayaland, M66B, BrianLayman, szepe.viktor
 Tags: comments, spam, http:BL
 Requires at least: 2.0
 Tested up to: 3.3.1
-Stable tag: 1.9.1.1
+Stable tag: 1.9.1.2
 
 http:BL WordPress Plugin allows you to verify IP addresses of clients
 connecting to your blog against the Project Honey Pot database.
@@ -60,8 +60,8 @@ Of course there is. Visit [author's website](http://stepien.cc/~jan) in order
 to find his e-mail address and Jabber ID.
 
 == Changelog ==
-= 1.9.1.1 =
-* No changes. Webhook Sync test. Take 2
+= 1.9.1.x =
+* No changes. Webhook Sync test.
 
 = 1.9.1 =
 * New Maintainer initial check in.
